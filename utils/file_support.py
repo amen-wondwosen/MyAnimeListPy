@@ -34,8 +34,3 @@ def replace_spchars(s, filler=""):
     the string with its ascii equivalent.
     '''
     return re.sub(r'[^\x00-\x7F]+', filler, s)
-
-
-if __name__ == '__main__':
-    s = "Fate/kaleid liner Prisma☆Illya"
-    print(remove_illegal_characters(s))

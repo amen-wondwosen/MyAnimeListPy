@@ -1,10 +1,8 @@
 from collections import defaultdict
 import time
-from urllib.parse import urljoin
 
 import bs4
 from bs4 import BeautifulSoup
-from selenium import webdriver
 
 import utils
 from utils.download import download

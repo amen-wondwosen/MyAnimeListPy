@@ -79,7 +79,3 @@ def combine_sources(mal, al):
     j_data["rating"] = mal["rating"]
 
     return j_data
-
-if __name__ == '__main__':
-    url = "https://myanimelist.net/anime/12031/Kingdom"
-    print(get_id(url))
