@@ -4,7 +4,7 @@ import requests
 import requests.exceptions as rex
 
 from .anime import Anime
-from utils.download import download
+from .utils.download import download
 
 
 class NoContentError(Exception):
@@ -22,13 +22,13 @@ class MyAnimeList:
     def __init__(self, session=None) -> None:
         self.base_url = "https://myanimelist.net/"
         self.session = session if session else requests.session()
-        self.rate_limit = 4
+        self.rate_limit = 4.05
     
     def get_anime(self, id) -> Anime:
         req = download(f"{self.base_url}/anime/{id}", driver=self.session, wait_time=self.rate_limit)
 
         if req.ok:
-            return Anime(req.content)
+            return Anime((id, req.content))
         elif req.status_code == 404:
             raise NoContentError
         else:

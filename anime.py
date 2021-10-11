@@ -4,8 +4,8 @@ import time
 import bs4
 from bs4 import BeautifulSoup
 
-import utils
-from utils.download import download
+from . import utils
+from .utils.download import download
 
 class DuplicateTitleError(Exception):
     pass
@@ -17,8 +17,8 @@ class Anime:
                 "licensors", "studios", "source", "genres", "theme", "demographic",
                 "duration", "rating")
 
-    def __init__(self, raw_data):
-        _attrs = self.parse_page(raw_data)
+    def __init__(self, data):
+        _attrs = self.parse_page(data)
 
         self.id = _attrs.get("id")
         self.title = _attrs.get("title")
@@ -40,10 +40,6 @@ class Anime:
         self.demographic = _attrs.get("demographic", "Unknown")
         self.duration = _attrs.get("duration", "Unknown")
         self.rating = _attrs.get("rating", "Unknown")
-
-    def refresh(self):
-        """Refreshes data for the anime"""
-        self.__init__(self.id, self.client)
     
     def get_titles(self):
         """Returns a unique list of alternative titles for
@@ -89,6 +85,7 @@ class Anime:
 
     def parse_page(self, data):
         '''
+        @param data: (id, html containing anime data)
         Parses a given html containing data from an
         anime. Extract from the html:
             - English version of title
@@ -100,9 +97,9 @@ class Anime:
             - Tags
             - As well as any other relevant metadata
         '''
-        soup = BeautifulSoup(data, "html.parser")
+        soup = BeautifulSoup(data[1], "html.parser")
         
-        metadata_dict = {"id": id}
+        metadata_dict = {"id": data[0]}
 
         metadata_dict["title"] = soup.select_one('h1[class="title-name h1_bold_none"]').text
 
@@ -150,7 +147,7 @@ class Anime:
         elif ("genre" not in metadata_dict.keys()) and ("genres" not in metadata_dict.keys()):
             metadata_dict["genres"] = []
 
-        if "premiered" in metadata_dict.keys():
+        if ("premiered" in metadata_dict.keys()) and (len(metadata_dict["premiered"].split()) > 1):
             metadata_dict["season"], metadata_dict["year"] = metadata_dict.pop("premiered").split()
 
         return metadata_dict

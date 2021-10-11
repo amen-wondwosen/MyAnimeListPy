@@ -28,7 +28,7 @@ def combine_sources(mal, al):
 
     j_data = {
         "idMal": "", "idAL": "", "title": "",
-        "english": [], "japanese": [], "romaji": [], "synonyms": [], "native": "",
+        "english": [], "japanese": [], "romaji": [], "synonyms": [], "native": [],
         "type": "",
         "episodes": 0, "status": "", "aired": "???", "season": "", "year": "",
         "demographic": "", "genres": [], "tags": [], "theme": "",
@@ -43,7 +43,7 @@ def combine_sources(mal, al):
     j_data["title"] = mal["title"]
 
     j_data["english"] += mal.get("english", [])
-    j_data["english"].append(al["title"].get("english", ""))
+    if al["title"]["english"]: j_data["english"].append(al["title"]["english"])
 
     j_data["japanese"] += mal.get("japanese", [])
 
@@ -51,7 +51,7 @@ def combine_sources(mal, al):
 
     j_data["synonyms"] += mal.get("synonyms", [])
 
-    j_data["native"] = al["title"]["native"]
+    if al["title"]["native"]: j_data["native"] = al["title"]["native"]
 
     j_data["type"] = mal["type"]
 
@@ -72,7 +72,12 @@ def combine_sources(mal, al):
     
     j_data["source"] = mal["source"]
 
-    if mal["licensors"] != "None found": j_data["licensors"].append(mal["licensors"])
+    if mal["licensors"] != "None found":
+        if type(mal["licensors"]) == str:
+            j_data["licensors"].append(mal["licensors"])
+        else:
+            j_data["licensors"] = mal["licensors"]
+
     for edge in al["studios"]["edges"]:
         j_data["studios"].append(edge["node"]["name"])
 
