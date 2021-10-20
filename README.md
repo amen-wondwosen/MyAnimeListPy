@@ -8,7 +8,10 @@ bs4
 
 requests
 
-## Todo
-- functionality for manga (WIP)
+## Features
+- functionality for anime
+- functionality for manga
+
+## Work-in-Progress
 - functionality for characters
 - functionality for staff / voice actors
