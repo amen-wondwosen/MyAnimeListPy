@@ -97,9 +97,9 @@ class Anime:
             - Tags
             - As well as any other relevant metadata
         '''
-        soup = BeautifulSoup(data[1], "html.parser")
+        soup = BeautifulSoup(data.text, "html.parser")
         
-        metadata_dict = {"id": data[0]}
+        metadata_dict = {"id": utils.get_id(data.url)}
 
         metadata_dict["title"] = soup.select_one('h1[class="title-name h1_bold_none"]').text
 
