@@ -1,4 +1,3 @@
-from collections import defaultdict
 import time
 
 import bs4
@@ -13,16 +12,12 @@ class DuplicateTitleError(Exception):
 
 class Manga:
     __slots__ = ("client", "id", "title", "english", "synonyms", "japanese", "type",
-                "volumes", "chapters", "status", "published", "producers",
-                "licensors", "studios", "source", "genres", "theme", "demographic",
+                "volumes", "chapters", "status", "published",
+                "source", "genres", "theme", "demographic",
                 "serialization", "authors")
 
     def __init__(self, data):
         _attrs = self.parse_page(data)
-
-        for k, val in _attrs.items():
-            print(f"{k} -> {val}")
-            print("-------------")
 
         self.id = _attrs.get("id")
         self.title = _attrs.get("title")
@@ -34,9 +29,6 @@ class Manga:
         self.chapters = _attrs.get("chapters", "0")
         self.status = _attrs.get("status")
         self.published = _attrs.get("published", "Unknown")
-        self.producers = _attrs.get("producers", [])
-        self.licensors = _attrs.get("licensors", [])
-        self.studios = _attrs.get("studios", [])
         self.source = _attrs.get("source", "Unknown")
         self.genres = _attrs.get("genres", [])
         self.theme = _attrs.get("theme", "Unknown")
@@ -77,13 +69,11 @@ class Manga:
         return {
             "id": self.id, "title": self.title,
             "english": self.english, "synonyms": self.synonyms, "japanese": self.japanese,
-            "type": self.type, "episodes": self.episodes, "status": self.status,
-            "aired": self.aired, "season": self.season, "year": self.year,
-            "producers": self.producers, "licensors": self.licensors, "studios": self.studios,
-            "source": self.source,
+            "type": self.type, "volumes": self.volumes, "chapters": self.chapters, "status": self.status,
+            "published": self.published, "source": self.source,
             "genres": self.genres, "theme": self.theme, "demographic": self.demographic,
-            "duration": self.duration,
-            "rating": self.rating,
+            "serialization": self.serialization,
+            "authors": self.authors,
         }
 
     def parse_page(self, data):
@@ -153,7 +143,7 @@ class Manga:
         elif ("genre" not in metadata_dict.keys()) and ("genres" not in metadata_dict.keys()):
             metadata_dict["genres"] = []
 
-        # Normalize Japanese names to first name first format
+        # In case of anime with only one genre
         if ("author" in metadata_dict.keys()) and ("authors" not in metadata_dict.keys()):
             metadata_dict["authors"] = metadata_dict.pop("author")
         elif ("author" not in metadata_dict.keys()) and ("authors" not in metadata_dict.keys()):
