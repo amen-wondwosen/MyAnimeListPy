@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import urlparse
 
 
@@ -28,10 +29,23 @@ def combine_sources(mal, al):
 
     j_data = {
         "idMal": "", "idAL": "", "title": "",
-        "english": [], "japanese": [], "romaji": [], "synonyms": [], "native": [],
+        "english": [], "native": [],
         "type": "",
-        "episodes": 0, "status": "", "aired": "???", "season": "", "year": "",
-        "demographic": "", "genres": [], "tags": [], "theme": "",
+        "episodes": 0, "status": "",
+        "airing_date": {
+            "start": "????-??-??",
+            "end": "????-??-??"
+        },
+        "season": {
+            "season": "",
+            "year": ""
+        },
+        "category": {
+            "demographic": "",
+            "theme": "",
+            "genres": [],
+            "tags": []
+        },
         "source": "",
         "licensors": [], "studios": [],
         "rating": ""
@@ -42,16 +56,13 @@ def combine_sources(mal, al):
 
     j_data["title"] = mal["title"]
 
-    j_data["english"] += mal.get("english", [])
-    if al["title"]["english"]: j_data["english"].append(al["title"]["english"])
+    # Maintain a list with no duplicates
+    j_data["english"] += list(set(mal.get("english", []) \
+                        + mal.get("synonyms", []) \
+                        + al["title"].get("english", []) \
+                        + al["title"].get("romanji", [])))
 
-    j_data["japanese"] += mal.get("japanese", [])
-
-    j_data["romaji"].append(al["title"].get("romaji", []))
-
-    j_data["synonyms"] += mal.get("synonyms", [])
-
-    if al["title"]["native"]: j_data["native"] = al["title"]["native"]
+    j_data["japanese"] += list(set(mal.get("japanese", []) + al["title"].get("native", [])))
 
     j_data["type"] = mal["type"]
 
@@ -59,16 +70,16 @@ def combine_sources(mal, al):
 
     j_data["status"] = mal["status"]
 
-    j_data["aired"] = mal["aired"]
+    airing_date = _parse_airing_date(mal["aired"])
+    j_data["airing_date"]["start"], j_data["airing_date"]["start"] = airing_date
 
-    j_data["season"] = al["season"]
-    j_data["year"] = al["seasonYear"]
+    j_data["season"]["season"] = al["season"]
+    j_data["season"]["year"] = al["seasonYear"]
 
-    j_data["demographic"] = mal.get("demographic", "")
-
-    j_data["genres"] = list(set(mal["genres"] + al["genres"]))
-    j_data["tags"] = [node["name"] for node in al["tags"]]
-    j_data["theme"] = mal.get("theme", "")
+    j_data["category"]["demographic"] = mal.get("demographic", "")
+    j_data["category"]["theme"] = mal.get("theme", "")
+    j_data["category"]["genres"] = list(set(mal["genres"] + al["genres"]))
+    j_data["category"]["tags"] = [node["name"] for node in al["tags"]]
     
     j_data["source"] = mal["source"]
 
@@ -93,10 +104,23 @@ def mal_all(mal):
     '''
     j_data = {
         "idMal": "", "idAL": "", "title": "",
-        "english": [], "japanese": [], "romaji": [], "synonyms": [], "native": [],
+        "english": [], "native": [],
         "type": "",
-        "episodes": 0, "status": "", "aired": "", "season": "", "year": "",
-        "demographic": "", "genres": [], "tags": [], "theme": "",
+        "episodes": 0, "status": "",
+        "airing_date": {
+            "start": "????-??-??",
+            "end": "????-??-??"
+        },
+        "season": {
+            "season": "",
+            "year": ""
+        },
+        "category": {
+            "demographic": "",
+            "theme": "",
+            "genres": [],
+            "tags": []
+        },
         "source": "",
         "licensors": [], "studios": [],
         "rating": ""
@@ -106,11 +130,11 @@ def mal_all(mal):
 
     j_data["title"] = mal["title"]
 
-    j_data["english"] += mal.get("english", [])
+    # Maintain a list with no duplicates
+    j_data["english"] += list(set(mal.get("english", []) \
+                        + mal.get("synonyms", [])))
 
     j_data["japanese"] += mal.get("japanese", [])
-
-    j_data["synonyms"] += mal.get("synonyms", [])
 
     j_data["type"] = mal["type"]
 
@@ -118,15 +142,15 @@ def mal_all(mal):
 
     j_data["status"] = mal["status"]
 
+    airing_date = _parse_airing_date(mal["aired"])
+    j_data["airing_date"]["start"], j_data["airing_date"]["start"] = airing_date
+
     if "premiered" in mal.keys():
         j_data["season"], j_data["year"] = mal["premiered"].split()
 
-    j_data["demographic"] = mal.get("demographic", "")
-
-    j_data["genres"] = mal["genres"]
-    j_data["theme"] = mal.get("theme", "")
-    
-    j_data["source"] = mal["source"]
+    j_data["category"]["demographic"] = mal.get("demographic", "")
+    j_data["category"]["theme"] = mal.get("theme", "")
+    j_data["category"]["genres"] = list(set(mal["genres"]))
 
     if mal["licensors"] != "None found":
         if type(mal["licensors"]) == str:
@@ -139,3 +163,21 @@ def mal_all(mal):
     j_data["rating"] = mal["rating"]
 
     return j_data
+
+
+def _parse_airing_date(airing_date):
+
+    start_date = end_date = "????-??-??"
+
+    if " to " not in airing_date:
+        # only one date
+        start_date = end_date = dt_obj = str(datetime.strptime(airing_date, "%b %d, %Y").date())
+    else:
+        # safe to assume only two dates
+        start_date, end_date = airing_date.split(" to ")
+
+        if "?" in start_date: start_date = "????-??-??"
+        if "?" in end_date: end_date = "????-??-??"
+
+
+    return (start_date, end_date)
