@@ -57,12 +57,12 @@ def combine_sources(mal, al):
     j_data["title"] = mal["title"]
 
     # Maintain a list with no duplicates
-    j_data["english"] += list(set(mal.get("english", []) \
-                        + mal.get("synonyms", []) \
-                        + al["title"].get("english", []) \
-                        + al["title"].get("romanji", [])))
+    j_data["english"] += mal.get("english", []) + mal.get("synonyms", [])
+    if al["title"]["english"]: j_data["english"] += [al["title"]["english"]]
+    if al["title"]["romaji"]: j_data["english"] += [al["title"]["romaji"]]
+    j_data["english"] = list(set(j_data["english"]))
 
-    j_data["japanese"] += list(set(mal.get("japanese", []) + al["title"].get("native", [])))
+    j_data["native"] += list(set(mal.get("japanese", []) + [al["title"]["native"]]))
 
     j_data["type"] = mal["type"]
 
@@ -71,7 +71,7 @@ def combine_sources(mal, al):
     j_data["status"] = mal["status"]
 
     airing_date = _parse_airing_date(mal["aired"])
-    j_data["airing_date"]["start"], j_data["airing_date"]["start"] = airing_date
+    j_data["airing_date"]["start"], j_data["airing_date"]["end"] = airing_date
 
     j_data["season"]["season"] = al["season"]
     j_data["season"]["year"] = al["seasonYear"]
