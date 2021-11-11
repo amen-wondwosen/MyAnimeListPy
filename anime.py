@@ -28,18 +28,18 @@ class Anime:
         self.type = _attrs.get("type")
         self.episodes = _attrs.get("episodes", "0")
         self.status = _attrs.get("status")
-        self.aired = _attrs.get("aired", "Unknown")
-        self.season = _attrs.get("season", "Unknown")
-        self.year = _attrs.get("year", "Unknown")
+        self.aired = _attrs.get("aired", "")
+        self.season = _attrs.get("season", "")
+        self.year = _attrs.get("year", "")
         self.producers = _attrs.get("producers", [])
         self.licensors = _attrs.get("licensors", [])
         self.studios = _attrs.get("studios", [])
-        self.source = _attrs.get("source", "Unknown")
+        self.source = _attrs.get("source", "")
         self.genres = _attrs.get("genres", [])
-        self.theme = _attrs.get("theme", "Unknown")
-        self.demographic = _attrs.get("demographic", "Unknown")
-        self.duration = _attrs.get("duration", "Unknown")
-        self.rating = _attrs.get("rating", "Unknown")
+        self.theme = _attrs.get("theme", "")
+        self.demographic = _attrs.get("demographic", "")
+        self.duration = _attrs.get("duration", "")
+        self.rating = _attrs.get("rating", "")
     
     def get_titles(self):
         """Returns a unique list of alternative titles for
@@ -137,7 +137,7 @@ class Anime:
 
             if type(data) == str:
                 # Normalize marking for unknown data
-                data = data if data not in ("None found", "None", "N/A") else "Unknown"
+                data = "" if data.rstrip(",") in ("None found", "None", "N/A") else data.rstrip(",")
             
             metadata_dict[data_type.lower()] = [data] if data_type in ["english", "japanese", "native", "synonyms", "synonym"] else data
 
