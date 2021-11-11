@@ -58,11 +58,14 @@ def combine_sources(mal, al):
 
     # Maintain a list with no duplicates
     j_data["english"] += mal.get("english", []) + mal.get("synonyms", [])
-    if al["title"]["english"]: j_data["english"] += [al["title"]["english"]]
-    if al["title"]["romaji"]: j_data["english"] += [al["title"]["romaji"]]
+    if al["title"]["english"] != None: j_data["english"] += [al["title"]["english"]]
+    if al["title"]["romaji"] != None: j_data["english"] += [al["title"]["romaji"]]
     j_data["english"] = list(set(j_data["english"]))
 
-    j_data["native"] += list(set(mal.get("japanese", []) + [al["title"]["native"]]))
+    if al["title"]["native"] != None:
+        j_data["native"] += list(set(mal.get("japanese", []) + [al["title"]["native"]]))
+    else:
+        j_data["native"] += mal.get("japanese", [])
 
     j_data["type"] = mal["type"]
 
