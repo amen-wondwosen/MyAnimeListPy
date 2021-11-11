@@ -179,8 +179,14 @@ def _parse_airing_date(airing_date):
         # safe to assume only two dates
         start_date, end_date = airing_date.split(" to ")
 
-        if "?" in start_date: start_date = "????-??-??"
-        if "?" in end_date: end_date = "????-??-??"
+        if "?" in start_date:
+            start_date = "????-??-??"
+        else:
+            start_date = str(datetime.strptime(start_date, "%b %d, %Y").date())
 
+        if "?" in end_date:
+            end_date = "????-??-??"
+        else:
+            end_date = str(datetime.strptime(end_date, "%b %d, %Y").date())
 
     return (start_date, end_date)
