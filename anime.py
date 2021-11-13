@@ -26,7 +26,7 @@ class Anime:
         self.synonyms = _attrs.get("synonyms", [])
         self.japanese = _attrs.get("japanese", [])
         self.type = _attrs.get("type")
-        self.episodes = _attrs.get("episodes", "0")
+        self.episodes = _attrs.get("episodes", 0)
         self.status = _attrs.get("status")
         self.aired = _attrs.get("aired", "")
         self.season = _attrs.get("season", "")
