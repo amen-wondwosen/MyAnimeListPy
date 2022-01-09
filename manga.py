@@ -11,6 +11,9 @@ class DuplicateTitleError(Exception):
 
 
 class Manga:
+    """A class meant for gathering data scrapped from webpages
+    containing seasonal from MyAnimeList manga pages."""
+
     __slots__ = ("client", "id", "title", "english", "synonyms", "japanese", "type",
                 "volumes", "chapters", "status", "published",
                 "source", "genres", "theme", "demographic",

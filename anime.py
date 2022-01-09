@@ -12,6 +12,9 @@ class DuplicateTitleError(Exception):
 
 
 class Anime:
+    """A class meant for gathering data scrapped from webpages
+    containing seasonal from MyAnimeList anime pages."""
+
     __slots__ = ("client", "id", "title", "english", "synonyms", "japanese", "type",
                 "episodes", "status", "aired", "season", "year", "producers",
                 "licensors", "studios", "source", "genres", "theme", "demographic",
