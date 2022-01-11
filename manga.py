@@ -39,6 +39,12 @@ class Manga:
         self.serialization = _attrs.get("", "Unknown")
         self.authors = _attrs.get("authors", [])
     
+    def __str__(self) -> str:
+        return f"{self.id} <{self.title}>"
+    
+    def __hash__(self) -> int:
+        return hash(self.id)
+    
     def get_titles(self):
         """Returns a unique list of alternative titles for
         the anime. Order not guaranteed."""
@@ -157,9 +163,39 @@ class Manga:
             metadata_dict["season"], metadata_dict["year"] = metadata_dict.pop("premiered").split()
 
         return metadata_dict
-
-    def __str__(self) -> str:
-        return f"{self.id} <{self.title}>"
     
-    def __hash__(self) -> int:
-        return hash(self.id)
+    def refresh_data(self, webdriver=None) -> None:
+        """Update the class attributes (title, status, etc.) using the
+        manga id to (re)download the data from myanimelist.com.
+        
+        Parameters:
+        webdriver (requests.session()):
+        
+        Returns:
+        None
+        """
+        if not webdriver:
+            req = download("https://myanimelist.net/manga/" + self.id)
+        else:
+            req = download("https://myanimelist.net/manga/" + self.id, webdriver)
+
+        if not req.ok: return   # Skip bad requests
+
+        data = self.parse_page((self.id, req.content))
+
+        self.id = data.get("id")
+        self.title = data.get("title")
+        self.english = data.get("english", [])
+        self.synonyms = data.get("synonyms", [])
+        self.japanese = data.get("japanese", [])
+        self.type = data.get("type")
+        self.volumes = data.get("volumes", "0")
+        self.chapters = data.get("chapters", "0")
+        self.status = data.get("status")
+        self.published = data.get("published", "Unknown")
+        self.source = data.get("source", "Unknown")
+        self.genres = data.get("genres", [])
+        self.theme = data.get("theme", "Unknown")
+        self.demographic = data.get("demographic", "Unknown")
+        self.serialization = data.get("", "Unknown")
+        self.authors = data.get("authors", [])

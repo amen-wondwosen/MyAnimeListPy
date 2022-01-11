@@ -43,6 +43,12 @@ class Anime:
         self.demographic = _attrs.get("demographic", "")
         self.duration = _attrs.get("duration", "")
         self.rating = _attrs.get("rating", "")
+
+    def __str__(self) -> str:
+        return f"{self.id} <{self.title}>"
+    
+    def __hash__(self) -> int:
+        return hash(self.id)
     
     def get_titles(self):
         """Returns a unique list of alternative titles for
@@ -155,8 +161,42 @@ class Anime:
 
         return metadata_dict
 
-    def __str__(self) -> str:
-        return f"{self.id} <{self.title}>"
-    
-    def __hash__(self) -> int:
-        return hash(self.id)
+    def refresh_data(self, webdriver=None) -> None:
+        """Update the class attributes (title, status, etc.) using the
+        anime id to (re)download the data from myanimelist.com.
+        
+        Parameters:
+        webdriver (requests.session()):
+        
+        Returns:
+        None
+        """
+        if not webdriver:
+            req = download("https://myanimelist.net/anime/" + self.id)
+        else:
+            req = download("https://myanimelist.net/anime/" + self.id, webdriver)
+
+        if not req.ok: return   # Skip bad requests
+
+        data = self.parse_page((self.id, req.content))
+
+        self.id = data.get("id")
+        self.title = data.get("title")
+        self.english = data.get("english", [])
+        self.synonyms = data.get("synonyms", [])
+        self.japanese = data.get("japanese", [])
+        self.type = data.get("type")
+        self.episodes = data.get("episodes", 0)
+        self.status = data.get("status")
+        self.aired = data.get("aired", "")
+        self.season = data.get("season", "")
+        self.year = data.get("year", "")
+        self.producers = data.get("producers", [])
+        self.licensors = data.get("licensors", [])
+        self.studios = data.get("studios", [])
+        self.source = data.get("source", "")
+        self.genres = data.get("genres", [])
+        self.theme = data.get("theme", "")
+        self.demographic = data.get("demographic", "")
+        self.duration = data.get("duration", "")
+        self.rating = data.get("rating", "")
