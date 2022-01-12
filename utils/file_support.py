@@ -1,18 +1,14 @@
-"""
-@author: Amen Wondwosen
-"""
-
 import re
 import os
 
-# illegal_filename_characters = r"[#%&{}\\<>*?\/ $!\'\":@]"
 ichars = '\\/:"*?<>|'
 
 def remove_illegal_characters(s: str, ichars=ichars, filler="_", sp=False):
-    '''
-    Replaces any illegal characters in s with filler and returns the
+    """Replaces any illegal characters in s with filler and returns the
     modified string.
-    '''
+    
+    
+    """
 
     if not s:
         return s
@@ -29,8 +25,6 @@ def remove_illegal_characters(s: str, ichars=ichars, filler="_", sp=False):
 
 
 def replace_spchars(s, filler=""):
-    '''
-    Replaces every special character in
-    the string with its ascii equivalent.
-    '''
+    """Replaces every special character in the string with its
+    ascii equivalent."""
     return re.sub(r'[^\x00-\x7F]+', filler, s)

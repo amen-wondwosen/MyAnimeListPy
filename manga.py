@@ -6,20 +6,36 @@ from bs4 import BeautifulSoup
 from . import utils
 from .utils.download import download
 
-class DuplicateTitleError(Exception):
-    pass
-
-
 class Manga:
-    """A class meant for gathering data scrapped from webpages
-    containing seasonal from MyAnimeList manga pages."""
+    """This is a class for gathering data scrapped from webpages
+    containing seasonal from MyAnimeList manga pages.
 
-    __slots__ = ("client", "id", "title", "english", "synonyms", "japanese", "type",
+    Attributes
+    -----------
+        id (int|str): A uid for representing an manga on MyAnimeList.
+        title (str): The title of the manga.
+        english (list): A list of english names.
+        synonyms (list): A list of alternative names.
+        japanese (list): A list of japanese/native names.
+        type (str): The type of media (Manga, Light Novel, etc.).
+        volumes (int): The number of volumes of the manga.
+        chapters (int): The number of chapters in the manga.
+        status (str): The airing status of the manga.
+        published (str): When the manga was first published.
+        genres (list): A list of genres.
+        theme (str): The theme of the anime.
+        demographic (str): The demographic of the anime (i.e. Shounen).
+        serialization (str): Where the manga is serialized (i.e. Shounen Jump).
+        authors (list): A list of authors for the manga.
+    """
+
+    __slots__ = ("id", "title", "english", "synonyms", "japanese", "type",
                 "volumes", "chapters", "status", "published",
-                "source", "genres", "theme", "demographic",
+                "genres", "theme", "demographic",
                 "serialization", "authors")
 
     def __init__(self, data):
+        """"""
         _attrs = self.parse_page(data)
 
         self.id = _attrs.get("id")
@@ -28,11 +44,10 @@ class Manga:
         self.synonyms = _attrs.get("synonyms", [])
         self.japanese = _attrs.get("japanese", [])
         self.type = _attrs.get("type")
-        self.volumes = _attrs.get("volumes", "0")
-        self.chapters = _attrs.get("chapters", "0")
+        self.volumes = _attrs.get("volumes", 0)
+        self.chapters = _attrs.get("chapters", 0)
         self.status = _attrs.get("status")
         self.published = _attrs.get("published", "Unknown")
-        self.source = _attrs.get("source", "Unknown")
         self.genres = _attrs.get("genres", [])
         self.theme = _attrs.get("theme", "Unknown")
         self.demographic = _attrs.get("demographic", "Unknown")
@@ -47,11 +62,11 @@ class Manga:
     
     def get_titles(self):
         """Returns a unique list of alternative titles for
-        the anime. Order not guaranteed."""
+        the manga. Order not preserved."""
         return list(set([self.title] + self.english + self.synonyms + self.japanese))
 
     def get_english(self):
-        """Returns the english name of the anime."""
+        """Returns the english name of the manga."""
         return self.english
 
     def get_alt(self):
@@ -62,48 +77,42 @@ class Manga:
         """Returns the native spelling of the title."""
         return self.japanese if self.japanese else self.english
     
-    def add_alt(self, alt_title):
-        """
-        Appends another alternative to the list of alternative titles.
+    def add_alt(self, alt_title) -> None:
+        """Appends another alternative to the list of alternative titles."""
+        if alt_title not in self.get_titles(): self.synonyms.append(alt_title)
         
-        Raises DuplicateTitleError if the title is already known.
-        """
-        if alt_title in self.get_titles():
-            raise DuplicateTitleError
-        else:
-            self.synonyms.append(alt_title)
-        
-    def gather_data(self):
-        """Returns a dict of all the relevant data for the anime."""
+    def gather_data(self) -> dict:
+        """Returns a dict of all the relevant data for the manga."""
         return {
             "id": self.id, "title": self.title,
             "english": self.english, "synonyms": self.synonyms, "japanese": self.japanese,
             "type": self.type, "volumes": self.volumes, "chapters": self.chapters, "status": self.status,
-            "published": self.published, "source": self.source,
+            "published": self.published,
             "genres": self.genres, "theme": self.theme, "demographic": self.demographic,
             "serialization": self.serialization,
             "authors": self.authors,
         }
 
-    def parse_page(self, data):
-        '''
-        @param data: (id, html containing anime data)
-        Parses a given html containing data from an
-        anime. Extract from the html:
-            - English version of title
-            - Any synonyms of title
-            - Japanese version (if any) of title
-            - Published date
-            - Volume count
-            - Chapter count
-            - Type of media (ie. Manga, Light Novel, etc.)
-            - Tags
-            - As well as any other relevant metadata
-        '''
+    def parse_page(self, data:tuple) -> dict:
+        """Parses a given html containing data from a manga.
+        
+        Given a resquests.Session object, parse the html and
+        return all relevant information.
+        
+        Parameters
+        ----------
+            data: A tuple containing a numerical id and a
+                requests.Response object containing the html for a webpage.
+            
+        Returns
+        -------
+            metadata_dict: A dictionary containing data scraped from
+                the given data.
+        """
         # A list of data types that could contain multiple values
         multi_data_types = ["english", "japanese", "native", "synonyms", "synonym"]
 
-        soup = BeautifulSoup(data.text, "html.parser")
+        soup = BeautifulSoup(data.content, "html.parser")
         
         metadata_dict = {"id": utils.get_id(data.url)}
 
@@ -166,13 +175,16 @@ class Manga:
     
     def refresh_data(self, webdriver=None) -> None:
         """Update the class attributes (title, status, etc.) using the
-        manga id to (re)download the data from myanimelist.com.
+        manga id to (re)download the data from MyAnimeList.
         
-        Parameters:
-        webdriver (requests.session()):
+        Parameters
+        ----------
+            webdriver (requests.Session): The webdriver for navigating
+                webpages.
         
-        Returns:
-        None
+        Returns
+        -------
+            None
         """
         if not webdriver:
             req = download("https://myanimelist.net/manga/" + self.id)
@@ -193,7 +205,6 @@ class Manga:
         self.chapters = data.get("chapters", "0")
         self.status = data.get("status")
         self.published = data.get("published", "Unknown")
-        self.source = data.get("source", "Unknown")
         self.genres = data.get("genres", [])
         self.theme = data.get("theme", "Unknown")
         self.demographic = data.get("demographic", "Unknown")
